@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>화면 부품 지도</title>
+<style>
+  body { font-family: sans-serif; background: #f2f4f7; margin: 0; padding: 2rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+  h1 { font-size: 1.2rem; margin: 0; }
+  .note { color: #666; font-size: .85rem; margin: 0; }
+  .stage { display: flex; justify-content: center; padding-right: 130px; }
+  .wrap { width: 420px; max-width: 100%; display: flex; flex-direction: column; gap: 1.25rem; }
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 1.25rem; }
+  header.card { text-align: center; }
+  header h2 { margin: 0 0 .25rem; font-size: 1.4rem; }
+  header p { margin: 0; color: #666; font-size: .9rem; }
+  nav.card { padding: .5rem; }
+  nav ul { list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-around; }
+  nav a { display: block; padding: .5rem 1rem; border-radius: 8px; color: #333; text-decoration: none; }
+  nav a.active { background: #e8f0ff; color: #1a56db; }
+  main.card h3 { margin: 0 0 .25rem; font-size: 1rem; color: #1a56db; }
+  main ul { margin: 0; padding-left: 1.2rem; line-height: 1.7; font-size: .95rem; }
+  .counter { text-align: center; margin-top: 1rem; }
+  .count { font-size: 3rem; }
+  button { font-size: 1.5rem; padding: .5rem 1.5rem; border: 0; border-radius: 8px; background: #1a56db; color: #fff; }
+  footer.card { text-align: center; color: #666; font-size: .85rem; }
+  body { background: linear-gradient(180deg, #e0f4ff 0%, #fff4e0 100%); }
+  header.card { background: linear-gradient(135deg, #00a6d6, #3ddc97); color: #fff; }
+  header p { color: #effffa; }
+  nav.card { background: #fff7e6; border-top: 4px solid #ff9f1c; }
+  nav a.active { background: #ff9f1c; color: #fff; }
+  main.card { border-top: 4px solid #00a6d6; }
+  main.card h3 { color: #ef6c00; border-left: 4px solid #ff9f1c; padding-left: .5rem; }
+  main li::marker { color: #3ddc97; }
+  button { background: linear-gradient(135deg, #ff9f1c, #ff6b35); box-shadow: 0 3px 8px rgba(255,107,53,.4); }
+  .count { color: #ef6c00; }
+  footer.card { background: #0b3d5c; color: #cfe9f5; }
+
+  .part { position: relative; outline: 2px solid #e5484d; outline-offset: 3px; }
+  .tag { position: absolute; left: calc(100% + 14px); top: 50%; transform: translateY(-50%); white-space: nowrap; background: #e5484d; color: #fff; font-size: .8rem; padding: 2px 8px; border-radius: 10px; }
+  .tag::before { content: ""; position: absolute; right: 100%; top: 50%; width: 11px; border-top: 2px solid #e5484d; }
+  .tag.in { top: 8px; transform: none; }
+  table { border-collapse: collapse; background: #fff; }
+  td, th { border: 1px solid #ccc; padding: 4px 12px; text-align: left; font-size: .9rem; }
+  .no { color: #999; }
+</style>
+</head>
+<body>
+  <h1>index.html 화면 부품 지도</h1>
+  <p class="note">index.html의 구조를 그대로 옮긴 미리보기입니다. 목록은 일부만 표시했습니다.</p>
+
+  <div class="stage">
+    <div class="wrap">
+      <header class="card part">
+        <h2>🍊 내 취향 카드 🌴</h2>
+        <p>내가 좋아하는 것들을 모아둔 카드</p>
+        <span class="tag">헤더</span>
+      </header>
+
+      <nav class="card part">
+        <ul>
+          <li><a href="#" class="active">🏠 홈</a></li>
+          <li><a href="#">💖 취향</a></li>
+          <li><a href="#">📝 기록</a></li>
+          <li><a href="#">👋 소개</a></li>
+        </ul>
+        <span class="tag">탭 (메뉴)</span>
+      </nav>
+
+      <main class="card part">
+        <h3>🌊 제주대학교에 오신 것을 환영합니다</h3>
+        <div class="part" style="margin:.5rem 0">
+          <ul>
+            <li>바다와 한라산 사이, 제주의 중심에서 꿈을 키우는 대학입니다.</li>
+            <li>제주대학교는 제주를 대표하는 국립대학교입니다.</li>
+            <li>… (생략)</li>
+          </ul>
+          <span class="tag">목록</span>
+        </div>
+        <div class="counter">
+          <div class="count">0</div>
+          <div class="part" style="display:inline-block"><button>👍 +2</button><span class="tag">버튼</span></div>
+        </div>
+        <span class="tag in">카드 (본문)</span>
+      </main>
+
+      <footer class="card part">
+        🌺 © 2026 내 취향 카드 · Made with 💛 in Jeju 🌺
+        <span class="tag">카드 (푸터)</span>
+      </footer>
+    </div>
+  </div>
+
+  <table>
+    <tr><th>이름표</th><th>index.html에 있나?</th></tr>
+    <tr><td>헤더</td><td>있음 (제목 카드)</td></tr>
+    <tr><td>카드</td><td>있음 (헤더·메뉴·본문·푸터가 모두 카드 모양)</td></tr>
+    <tr><td>버튼</td><td>있음 (+2 버튼)</td></tr>
+    <tr><td>탭</td><td>있음 (홈·취향·기록·소개 메뉴)</td></tr>
+    <tr><td>목록</td><td>있음 (본문의 홍보 문구 목록)</td></tr>
+    <tr class="no"><td>입력창</td><td>없음</td></tr>
+  </table>
+</body>
+</html>
