@@ -41,11 +41,11 @@
   .search button, .pager button { padding: .5rem 1rem; font-size: 1rem; border: 0; border-radius: 8px; background: #ff9f1c; color: #fff; cursor: pointer; }
   .search button:disabled, .pager button:disabled { background: #bbb; cursor: default; }
   #status { color: #666; font-size: .9rem; min-height: 1.3em; }
-  .grid { display: none; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .5rem; margin-top: .5rem; }
-  .grid a { display: block; aspect-ratio: 1; overflow: hidden; border-radius: 8px; background: #000; }
-  .grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .2s; }
-  .grid a:hover img { transform: scale(1.08); }
-  .pager { display: none; justify-content: center; align-items: center; gap: .75rem; margin-top: .75rem; font-size: .9rem; }
+  .slider { position: relative; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4 / 3; display: none; margin-top: .5rem; }
+  .slider img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .caption { position: absolute; left: 0; right: 0; bottom: 0; padding: .4rem; color: #fff; background: rgba(0,0,0,.5); font-size: .8rem; text-align: center; }
+  .controls { text-align: center; margin-top: .75rem; }
+  .controls button { padding: .5rem 1rem; font-size: 1rem; border: 0; border-radius: 8px; background: #ff9f1c; color: #fff; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -83,13 +83,12 @@
         <input id="query" type="text" placeholder="검색어 (예: 제주 감귤, jeju)">
         <button type="submit">검색</button>
       </form>
-      <div id="status">검색어를 입력하면 사진을 10장씩 보여줍니다.</div>
-      <div class="grid" id="grid"></div>
-      <div class="pager" id="pager">
-        <button id="prevPage">◀ 이전 10개</button>
-        <span id="pageInfo"></span>
-        <button id="nextPage">다음 10개 ▶</button>
+      <div id="status">검색어를 입력하면 사진이 2초마다 자동으로 넘어갑니다.</div>
+      <div class="slider" id="slider">
+        <img id="slide" alt="">
+        <div class="caption" id="caption"></div>
       </div>
+      <div class="controls"><button id="toggle" type="button">⏸ 일시정지</button></div>
     </section>
 
     <article class="box" id="season">
@@ -122,27 +121,46 @@
   </div>
   <script>
     const PER_PAGE = 10;
+    const INTERVAL = 2000;
     const $ = id => document.getElementById(id);
     let hits = [], idx = 0, page = 1, total = 0, query = '';
+    let timer = null, paused = false, token = 0, debounce = null;
 
     $('searchForm').addEventListener('submit', e => {
       e.preventDefault();
-      query = $('query').value.trim();
-      if (query) load(1);
+      clearTimeout(debounce);
+      search();
+    });
+    // 입력을 멈추면 버튼을 누르지 않아도 자동으로 검색한다.
+    $('query').addEventListener('input', () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(search, 700);
     });
 
+    function search() {
+      const q = $('query').value.trim();
+      if (!q || q === query && hits.length) return;
+      query = q;
+      load(1);
+    }
+
     async function load(p) {
+      const my = ++token;
+      stop();
       $('status').textContent = '불러오는 중...';
       try {
         const res = await fetch(`/api/pixabay?q=${encodeURIComponent(query)}&page=${p}`);
         const data = await res.json().catch(() => null);
+        if (my !== token) return;
         if (!data) throw new Error('서버 함수(/api/pixabay)에 연결할 수 없습니다. Vercel에 배포된 주소(또는 vercel dev)에서 열어주세요.');
         if (!res.ok) throw new Error(data.error || `오류 ${res.status}`);
-        if (!data.hits.length) { $('status').textContent = '검색 결과가 없습니다.'; return; }
+        if (!data.hits.length) { hits = []; $('status').textContent = '검색 결과가 없습니다.'; return; }
         hits = data.hits; total = data.totalHits; page = p; idx = 0;
-        $('status').textContent = `"${query}" 검색 결과 ${total}장`;
+        $('status').textContent = `"${query}" 검색 결과 ${total}장 · 2초마다 자동으로 넘어갑니다`;
         render();
+        start();
       } catch (err) {
+        if (my !== token) return;
         $('status').textContent = err instanceof TypeError
           ? '서버(/api/pixabay)에 연결할 수 없습니다. 파일을 직접 열지 말고 Vercel 배포 주소(또는 vercel dev)에서 열어주세요.'
           : err.message;
@@ -150,26 +168,28 @@
     }
 
     function render() {
-      const grid = $('grid');
-      grid.innerHTML = '';
-      hits.forEach(h => {
-        const a = document.createElement('a');
-        a.href = h.webformatURL; a.target = '_blank'; a.rel = 'noopener'; a.title = h.tags + ' · by ' + h.user;
-        const img = document.createElement('img');
-        img.src = h.webformatURL; img.alt = h.tags; img.loading = 'lazy';
-        a.appendChild(img);
-        grid.appendChild(a);
-      });
-      grid.style.display = 'grid';
-      $('pager').style.display = 'flex';
-      const pages = Math.ceil(total / PER_PAGE);
-      $('pageInfo').textContent = `${page} / ${pages}`;
-      $('prevPage').disabled = page <= 1;
-      $('nextPage').disabled = page >= pages;
+      const h = hits[idx];
+      $('slider').style.display = 'block';
+      $('slide').src = h.webformatURL;
+      $('slide').alt = h.tags;
+      $('caption').textContent = `${idx + 1} / ${hits.length} · ${h.tags} · by ${h.user}`;
     }
 
-    $('prevPage').onclick = () => load(page - 1);
-    $('nextPage').onclick = () => load(page + 1);
+    function next() {
+      if (idx + 1 < hits.length) { idx++; render(); return; }
+      // 10장을 다 보여줬으면 다음 10장을 불러오고, 끝이면 처음으로 돌아간다.
+      const pages = Math.ceil(total / PER_PAGE);
+      load(page < pages ? page + 1 : 1);
+    }
+
+    function start() { stop(); if (!paused && hits.length) timer = setInterval(next, INTERVAL); }
+    function stop() { clearInterval(timer); timer = null; }
+
+    $('toggle').onclick = () => {
+      paused = !paused;
+      $('toggle').textContent = paused ? '▶ 재생' : '⏸ 일시정지';
+      paused ? stop() : start();
+    };
   </script>
 </body>
 </html>
