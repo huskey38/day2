@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixabay 이미지 슬라이드</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: sans-serif; margin: 0; padding: 1rem; background: #f2f4f7; }
+  .app { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+  h1 { margin: 0; font-size: 1.4rem; text-align: center; }
+  form { display: flex; gap: .5rem; flex-wrap: wrap; }
+  input { flex: 1 1 200px; padding: .6rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 8px; }
+  button { padding: .6rem 1.2rem; font-size: 1rem; border: 0; border-radius: 8px; background: #1a56db; color: #fff; cursor: pointer; }
+  button:disabled { background: #aaa; cursor: default; }
+  #status { text-align: center; color: #666; min-height: 1.4em; }
+  .slider { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 4 / 3; display: none; }
+  .slider img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); font-size: 1.5rem; padding: .4rem .9rem; }
+  #prev { left: 8px; } #next { right: 8px; }
+  .caption { position: absolute; left: 0; right: 0; bottom: 0; padding: .5rem; color: #fff; background: rgba(0,0,0,.5); font-size: .85rem; text-align: center; }
+  .pager { display: none; justify-content: center; align-items: center; gap: 1rem; }
+  .pager button { background: #555; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <h1>🖼️ Pixabay 이미지 슬라이드</h1>
+
+    <form id="keyForm">
+      <input id="apiKey" type="password" placeholder="Pixabay API KEY" autocomplete="off">
+      <button type="submit">키 저장</button>
+    </form>
+
+    <form id="searchForm">
+      <input id="query" type="text" placeholder="검색어 (예: jeju, tangerine)">
+      <button type="submit">검색</button>
+    </form>
+
+    <div id="status">API KEY를 저장한 뒤 검색어를 입력하세요.</div>
+
+    <div class="slider" id="slider">
+      <img id="slide" alt="">
+      <button class="nav" id="prev" aria-label="이전">‹</button>
+      <button class="nav" id="next" aria-label="다음">›</button>
+      <div class="caption" id="caption"></div>
+    </div>
+
+    <div class="pager" id="pager">
+      <button id="prevPage">◀ 이전 10개</button>
+      <span id="pageInfo"></span>
+      <button id="nextPage">다음 10개 ▶</button>
+    </div>
+  </div>
+
+  <script>
+    const PER_PAGE = 10;
+    const $ = id => document.getElementById(id);
+    let hits = [], idx = 0, page = 1, total = 0, query = '';
+
+    const getKey = () => { try { return localStorage.getItem('pixabay_key') || ''; } catch { return ''; } };
+    $('apiKey').value = getKey();
+
+    $('keyForm').addEventListener('submit', e => {
+      e.preventDefault();
+      try { localStorage.setItem('pixabay_key', $('apiKey').value.trim()); } catch {}
+      $('status').textContent = '키를 이 브라우저에 저장했습니다.';
+    });
+
+    $('searchForm').addEventListener('submit', e => {
+      e.preventDefault();
+      query = $('query').value.trim();
+      if (query) load(1);
+    });
+
+    async function load(p) {
+      const key = $('apiKey').value.trim() || getKey();
+      if (!key) { $('status').textContent = 'API KEY를 먼저 입력하세요.'; return; }
+      $('status').textContent = '불러오는 중...';
+      const url = `https://pixabay.com/api/?key=${encodeURIComponent(key)}&q=${encodeURIComponent(query)}&image_type=photo&per_page=${PER_PAGE}&page=${p}`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(res.status === 429 ? '요청 한도 초과(잠시 후 다시)' : `오류 ${res.status} (KEY를 확인하세요)`);
+        const data = await res.json();
+        if (!data.hits.length) { $('status').textContent = '검색 결과가 없습니다.'; return; }
+        hits = data.hits; total = data.totalHits; page = p; idx = 0;
+        $('status').textContent = `"${query}" 검색 결과 ${total}장`;
+        render();
+      } catch (err) {
+        $('status').textContent = err.message;
+      }
+    }
+
+    function render() {
+      const h = hits[idx];
+      $('slider').style.display = 'block';
+      $('pager').style.display = 'flex';
+      $('slide').src = h.webformatURL;
+      $('slide').alt = h.tags;
+      $('caption').textContent = `${idx + 1} / ${hits.length} · ${h.tags} · by ${h.user}`;
+      const pages = Math.ceil(total / PER_PAGE);
+      $('pageInfo').textContent = `${page} / ${pages} 페이지`;
+      $('prevPage').disabled = page <= 1;
+      $('nextPage').disabled = page >= pages;
+    }
+
+    $('prev').onclick = () => { idx = (idx - 1 + hits.length) % hits.length; render(); };
+    $('next').onclick = () => { idx = (idx + 1) % hits.length; render(); };
+    $('prevPage').onclick = () => load(page - 1);
+    $('nextPage').onclick = () => load(page + 1);
+  </script>
+</body>
+</html>
