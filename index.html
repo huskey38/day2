@@ -46,6 +46,9 @@
   .caption { position: absolute; left: 0; right: 0; bottom: 0; padding: .4rem; color: #fff; background: rgba(0,0,0,.5); font-size: .8rem; text-align: center; }
   .controls { text-align: center; margin-top: .75rem; }
   .controls button { padding: .5rem 1rem; font-size: 1rem; border: 0; border-radius: 8px; background: #ff9f1c; color: #fff; cursor: pointer; }
+  .chat-fab { position: fixed; right: 20px; bottom: 20px; z-index: 10; padding: .8rem 1.2rem; font-size: 1rem; border: 0; border-radius: 28px; background: linear-gradient(135deg, #00a6d6, #3ddc97); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25); cursor: pointer; }
+  .chat-panel { position: fixed; right: 20px; bottom: 80px; z-index: 10; width: 380px; max-width: calc(100vw - 40px); height: 560px; max-height: calc(100vh - 100px); border: 0; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.3); background: #fff; display: none; }
+  .chat-panel.open { display: block; }
 </style>
 </head>
 <body>
@@ -190,6 +193,20 @@
       $('toggle').textContent = paused ? '▶ 재생' : '⏸ 일시정지';
       paused ? stop() : start();
     };
+  </script>
+  <button class="chat-fab" id="chatBtn" type="button">💬 에이전트와 채팅</button>
+  <iframe class="chat-panel" id="chatPanel" title="제주 특산물 에이전트" src="about:blank"></iframe>
+  <script>
+    // 버튼을 누르면 agent.html 을 불러와 채팅 화면을 보여준다.
+    (function () {
+      const btn = document.getElementById('chatBtn');
+      const panel = document.getElementById('chatPanel');
+      btn.addEventListener('click', () => {
+        const open = panel.classList.toggle('open');
+        if (open && panel.getAttribute('src') === 'about:blank') panel.src = 'agent.html';
+        btn.textContent = open ? '✖ 채팅 닫기' : '💬 에이전트와 채팅';
+      });
+    })();
   </script>
 </body>
 </html>
