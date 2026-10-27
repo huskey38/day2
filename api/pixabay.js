@@ -20,6 +20,7 @@ module.exports = async (req, res) => {
     page: String(page),
     per_page: '10',
     image_type: 'photo',
+    lang: 'ko',
   });
 
   try {

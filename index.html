@@ -41,11 +41,10 @@
   .search button, .pager button { padding: .5rem 1rem; font-size: 1rem; border: 0; border-radius: 8px; background: #ff9f1c; color: #fff; cursor: pointer; }
   .search button:disabled, .pager button:disabled { background: #bbb; cursor: default; }
   #status { color: #666; font-size: .9rem; min-height: 1.3em; }
-  .slider { position: relative; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4 / 3; display: none; margin-top: .5rem; }
-  .slider img { width: 100%; height: 100%; object-fit: contain; display: block; }
-  .slider .arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); font-size: 1.5rem; padding: .3rem .8rem; }
-  #prev { left: 8px; } #next { right: 8px; }
-  .caption { position: absolute; left: 0; right: 0; bottom: 0; padding: .4rem; color: #fff; background: rgba(0,0,0,.5); font-size: .8rem; text-align: center; }
+  .grid { display: none; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .5rem; margin-top: .5rem; }
+  .grid a { display: block; aspect-ratio: 1; overflow: hidden; border-radius: 8px; background: #000; }
+  .grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .2s; }
+  .grid a:hover img { transform: scale(1.08); }
   .pager { display: none; justify-content: center; align-items: center; gap: .75rem; margin-top: .75rem; font-size: .9rem; }
 </style>
 </head>
@@ -85,12 +84,7 @@
         <button type="submit">검색</button>
       </form>
       <div id="status">검색어를 입력하면 사진을 10장씩 보여줍니다.</div>
-      <div class="slider" id="slider">
-        <img id="slide" alt="">
-        <button class="arrow" id="prev" aria-label="이전">‹</button>
-        <button class="arrow" id="next" aria-label="다음">›</button>
-        <div class="caption" id="caption"></div>
-      </div>
+      <div class="grid" id="grid"></div>
       <div class="pager" id="pager">
         <button id="prevPage">◀ 이전 10개</button>
         <span id="pageInfo"></span>
@@ -141,32 +135,39 @@
       $('status').textContent = '불러오는 중...';
       try {
         const res = await fetch(`/api/pixabay?q=${encodeURIComponent(query)}&page=${p}`);
-        const data = await res.json();
+        const data = await res.json().catch(() => null);
+        if (!data) throw new Error('서버 함수(/api/pixabay)에 연결할 수 없습니다. Vercel에 배포된 주소(또는 vercel dev)에서 열어주세요.');
         if (!res.ok) throw new Error(data.error || `오류 ${res.status}`);
         if (!data.hits.length) { $('status').textContent = '검색 결과가 없습니다.'; return; }
         hits = data.hits; total = data.totalHits; page = p; idx = 0;
         $('status').textContent = `"${query}" 검색 결과 ${total}장`;
         render();
       } catch (err) {
-        $('status').textContent = err.message;
+        $('status').textContent = err instanceof TypeError
+          ? '서버(/api/pixabay)에 연결할 수 없습니다. 파일을 직접 열지 말고 Vercel 배포 주소(또는 vercel dev)에서 열어주세요.'
+          : err.message;
       }
     }
 
     function render() {
-      const h = hits[idx];
-      $('slider').style.display = 'block';
+      const grid = $('grid');
+      grid.innerHTML = '';
+      hits.forEach(h => {
+        const a = document.createElement('a');
+        a.href = h.webformatURL; a.target = '_blank'; a.rel = 'noopener'; a.title = h.tags + ' · by ' + h.user;
+        const img = document.createElement('img');
+        img.src = h.webformatURL; img.alt = h.tags; img.loading = 'lazy';
+        a.appendChild(img);
+        grid.appendChild(a);
+      });
+      grid.style.display = 'grid';
       $('pager').style.display = 'flex';
-      $('slide').src = h.webformatURL;
-      $('slide').alt = h.tags;
-      $('caption').textContent = `${idx + 1} / ${hits.length} · ${h.tags} · by ${h.user}`;
       const pages = Math.ceil(total / PER_PAGE);
       $('pageInfo').textContent = `${page} / ${pages}`;
       $('prevPage').disabled = page <= 1;
       $('nextPage').disabled = page >= pages;
     }
 
-    $('prev').onclick = () => { idx = (idx - 1 + hits.length) % hits.length; render(); };
-    $('next').onclick = () => { idx = (idx + 1) % hits.length; render(); };
     $('prevPage').onclick = () => load(page - 1);
     $('nextPage').onclick = () => load(page + 1);
   </script>
