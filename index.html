@@ -3,130 +3,53 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>제주 특산물 이야기</title>
+<title>Pixabay 이미지 슬라이드</title>
 <style>
   * { box-sizing: border-box; }
-  body { font-family: sans-serif; margin: 0; padding: 1rem; background: linear-gradient(180deg, #e0f4ff 0%, #fff4e0 100%); color: #333; }
-  .page { max-width: 960px; margin: 0 auto; display: grid; gap: 1rem;
-    grid-template-columns: 2fr 1fr;
-    grid-template-areas: "header header" "nav nav" "section aside" "gallery aside" "article aside" "footer footer"; }
-  .box { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 1.25rem; }
-  header { grid-area: header; text-align: center; background: linear-gradient(135deg, #00a6d6, #3ddc97); color: #fff; }
-  header h1 { margin: 0 0 .25rem; font-size: 2rem; }
-  header p { margin: 0; }
-  nav { grid-area: nav; background: #fff7e6; border-top: 4px solid #ff9f1c; padding: .5rem; }
-  nav ul { list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-around; flex-wrap: wrap; }
-  nav a { display: block; padding: .5rem 1rem; border-radius: 8px; color: #333; text-decoration: none; }
-  nav a:hover { background: #ff9f1c; color: #fff; }
-  section { grid-area: section; border-top: 4px solid #00a6d6; }
-  #gallery { grid-area: gallery; border-top: 4px solid #8e6cef; }
-  article { grid-area: article; border-top: 4px solid #ff9f1c; }
-  aside { grid-area: aside; background: #f1fff8; border-top: 4px solid #3ddc97; }
-  footer { grid-area: footer; text-align: center; background: #0b3d5c; color: #cfe9f5; font-size: .9rem; }
-  h2 { margin-top: 0; color: #007a9e; }
-  article h2 { color: #ef6c00; }
-  aside h2 { color: #1f9d6a; }
-  .items { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .75rem; }
-  .item { background: #fff7e6; border-radius: 10px; padding: .75rem; text-align: center; }
-  .item .emoji { font-size: 2rem; display: block; }
-  .item b { display: block; margin: .25rem 0; }
-  .item small { color: #666; }
-  ul.list { padding-left: 1.2rem; line-height: 1.8; }
-  ul.list li::marker { color: #3ddc97; }
-  @media (max-width: 700px) {
-    .page { grid-template-columns: 1fr; grid-template-areas: "header" "nav" "section" "gallery" "article" "aside" "footer"; }
-  }
-  .search { display: flex; gap: .5rem; margin-bottom: .75rem; }
-  .search input { flex: 1; padding: .5rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 8px; }
-  .search button, .pager button { padding: .5rem 1rem; font-size: 1rem; border: 0; border-radius: 8px; background: #ff9f1c; color: #fff; cursor: pointer; }
-  .search button:disabled, .pager button:disabled { background: #bbb; cursor: default; }
-  #status { color: #666; font-size: .9rem; min-height: 1.3em; }
-  .slider { position: relative; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4 / 3; display: none; margin-top: .5rem; }
+  body { font-family: sans-serif; margin: 0; padding: 1rem; background: #f2f4f7; }
+  .app { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+  h1 { margin: 0; font-size: 1.4rem; text-align: center; }
+  form { display: flex; gap: .5rem; flex-wrap: wrap; }
+  input { flex: 1 1 200px; padding: .6rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 8px; }
+  button { padding: .6rem 1.2rem; font-size: 1rem; border: 0; border-radius: 8px; background: #1a56db; color: #fff; cursor: pointer; }
+  button:disabled { background: #aaa; cursor: default; }
+  #status { text-align: center; color: #666; min-height: 1.4em; }
+  .slider { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 4 / 3; display: none; }
   .slider img { width: 100%; height: 100%; object-fit: contain; display: block; }
-  .slider .arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); font-size: 1.5rem; padding: .3rem .8rem; }
+  .nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); font-size: 1.5rem; padding: .4rem .9rem; }
   #prev { left: 8px; } #next { right: 8px; }
-  .caption { position: absolute; left: 0; right: 0; bottom: 0; padding: .4rem; color: #fff; background: rgba(0,0,0,.5); font-size: .8rem; text-align: center; }
-  .pager { display: none; justify-content: center; align-items: center; gap: .75rem; margin-top: .75rem; font-size: .9rem; }
+  .caption { position: absolute; left: 0; right: 0; bottom: 0; padding: .5rem; color: #fff; background: rgba(0,0,0,.5); font-size: .85rem; text-align: center; }
+  .pager { display: none; justify-content: center; align-items: center; gap: 1rem; }
+  .pager button { background: #555; }
 </style>
 </head>
 <body>
-  <div class="page">
-    <header class="box">
-      <h1>🍊 제주 특산물 이야기 🌴</h1>
-      <p>바람과 햇살이 키운 제주의 맛을 만나보세요</p>
-    </header>
+  <div class="app">
+    <h1>🖼️ Pixabay 이미지 슬라이드</h1>
 
-    <nav class="box">
-      <ul>
-        <li><a href="#home">🏠 홈</a></li>
-        <li><a href="#specialty">🍊 특산물</a></li>
-        <li><a href="#gallery">📷 사진</a></li>
-        <li><a href="#season">📅 제철 달력</a></li>
-        <li><a href="#guide">🧭 여행 팁</a></li>
-      </ul>
-    </nav>
+    <form id="searchForm">
+      <input id="query" type="text" placeholder="검색어 (예: jeju, tangerine)">
+      <button type="submit">검색</button>
+    </form>
 
-    <section class="box" id="specialty">
-      <h2>🍊 제주 대표 특산물</h2>
-      <div class="items">
-        <div class="item"><span class="emoji">🍊</span><b>감귤</b><small>제주를 대표하는 새콤달콤한 과일</small></div>
-        <div class="item"><span class="emoji">🍑</span><b>한라봉</b><small>한라산을 닮은 볼록한 모양, 높은 당도</small></div>
-        <div class="item"><span class="emoji">🌸</span><b>천혜향</b><small>향기가 진하고 과즙이 풍부</small></div>
-        <div class="item"><span class="emoji">🐖</span><b>흑돼지</b><small>숯불에 구워 먹는 제주의 맛</small></div>
-        <div class="item"><span class="emoji">🐟</span><b>옥돔</b><small>구이와 미역국으로 즐기는 생선</small></div>
-        <div class="item"><span class="emoji">🗡️</span><b>갈치</b><small>은빛 갈치로 만드는 조림과 구이</small></div>
-      </div>
-    </section>
+    <div id="status">검색어를 입력하세요.</div>
 
-    <section class="box" id="gallery">
-      <h2>📷 제주 특산물 사진 보기</h2>
-      <form class="search" id="searchForm">
-        <input id="query" type="text" placeholder="검색어 (예: 제주 감귤, jeju)">
-        <button type="submit">검색</button>
-      </form>
-      <div id="status">검색어를 입력하면 사진을 10장씩 보여줍니다.</div>
-      <div class="slider" id="slider">
-        <img id="slide" alt="">
-        <button class="arrow" id="prev" aria-label="이전">‹</button>
-        <button class="arrow" id="next" aria-label="다음">›</button>
-        <div class="caption" id="caption"></div>
-      </div>
-      <div class="pager" id="pager">
-        <button id="prevPage">◀ 이전 10개</button>
-        <span id="pageInfo"></span>
-        <button id="nextPage">다음 10개 ▶</button>
-      </div>
-    </section>
+    <div class="slider" id="slider">
+      <img id="slide" alt="">
+      <button class="nav" id="prev" aria-label="이전">‹</button>
+      <button class="nav" id="next" aria-label="다음">›</button>
+      <div class="caption" id="caption"></div>
+    </div>
 
-    <article class="box" id="season">
-      <h2>📅 제철 달력</h2>
-      <p>특산물은 제철에 먹을 때 가장 맛있습니다. 대략적인 시기를 참고하세요.</p>
-      <ul class="list">
-        <li>🍊 감귤: 가을부터 겨울</li>
-        <li>🍑 한라봉: 겨울부터 초봄</li>
-        <li>🌸 천혜향: 겨울부터 봄</li>
-        <li>🐟 옥돔과 갈치: 시기에 따라 다양하게 즐길 수 있음</li>
-        <li>🌿 고사리: 봄철 제주의 별미</li>
-      </ul>
-      <p><small>※ 시기는 해마다 날씨에 따라 달라질 수 있습니다.</small></p>
-    </article>
-
-    <aside class="box" id="guide">
-      <h2>🧭 여행 팁</h2>
-      <ul class="list">
-        <li>🌦️ 날씨 변화가 잦으니 우산을 챙기세요.</li>
-        <li>🍊 감귤 농장 체험으로 직접 귤을 따 보세요.</li>
-        <li>🌅 성산일출봉에서 일출을 감상해 보세요.</li>
-        <li>🚗 이동은 렌터카나 버스를 이용하세요.</li>
-        <li>🛍️ 시장에서 신선한 특산물을 구입하세요.</li>
-      </ul>
-    </aside>
-
-    <footer class="box" id="home">
-      🌺 © 2026 제주 특산물 이야기 · Made with 💛 in Jeju 🌺
-    </footer>
+    <div class="pager" id="pager">
+      <button id="prevPage">◀ 이전 10개</button>
+      <span id="pageInfo"></span>
+      <button id="nextPage">다음 10개 ▶</button>
+    </div>
   </div>
+
   <script>
+    // API KEY는 브라우저에 두지 않는다. /api/pixabay (Vercel 함수)가 환경변수 PIXABAY_API_KEY 로 호출한다.
     const PER_PAGE = 10;
     const $ = id => document.getElementById(id);
     let hits = [], idx = 0, page = 1, total = 0, query = '';
@@ -160,7 +83,7 @@
       $('slide').alt = h.tags;
       $('caption').textContent = `${idx + 1} / ${hits.length} · ${h.tags} · by ${h.user}`;
       const pages = Math.ceil(total / PER_PAGE);
-      $('pageInfo').textContent = `${page} / ${pages}`;
+      $('pageInfo').textContent = `${page} / ${pages} 페이지`;
       $('prevPage').disabled = page <= 1;
       $('nextPage').disabled = page >= pages;
     }
